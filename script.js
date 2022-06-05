@@ -53,6 +53,7 @@ function checkGuess() {
   } else {
     checkGuessResponseText.textContent = 'Sorry, that is incorrect. It was released in: '
     releaseDateText.innerHTML = releaseDate
+    releaseDateText.classList.remove('hide')
   }
   document.getElementById('user-answer').value = ''
   if (shuffledQuestions.length > currentQuestionIndex + 1) {
@@ -62,7 +63,6 @@ function checkGuess() {
     startButton.classList.remove('hide')
   }
   checkGuessResponseText.classList.remove('hide')
-  releaseDateText.classList.remove('hide')
 
 }
 
