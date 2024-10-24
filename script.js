@@ -4,11 +4,15 @@ const checkGuessButton = document.getElementById('check-guess-btn')
 const questionContainerElement = document.getElementById('question-container')
 const questionElement = document.getElementById('question')
 const posterElement = document.getElementById('movie-poster')
+const scoreDisplay = document.getElementById('current-score')
+const totalQuestionsDisplay = document.getElementById('total-questions')
+const currentQuestionDisplay = document.getElementById('current-question')
+const feedbackElement = document.getElementById('feedback')
+
 let userAnswer
 let releaseDate
-const checkGuessResponseText = document.getElementById('check-guess-response-text')
-const releaseDateText = document.querySelector('.content .value')
-
+let currentScore = 0
+let questionsAnswered = 0
 let shuffledQuestions, currentQuestionIndex
 
 startButton.addEventListener('click', startGame)
@@ -18,11 +22,13 @@ nextButton.addEventListener('click', () => {
 })
 
 function startGame() {
-  console.log('started')
   startButton.classList.add('hide')
   shuffledQuestions = questions.sort(() => Math.random() - .5)
   currentQuestionIndex = 0
+  currentScore = 0
+  questionsAnswered = 0
   questionContainerElement.classList.remove('hide')
+  updateScoreDisplay()
   setNextQuestion()
 }
 
@@ -33,37 +39,63 @@ function setNextQuestion() {
 
 function showQuestion(question) {
   posterElement.src = question.poster
+  posterElement.classList.add('movie-poster')
   questionElement.innerText = question.question
   releaseDate = question.answer
   checkGuessButton.addEventListener('click', checkGuess)
+  
+  questionsAnswered++
+  updateScoreDisplay()
 }
 
 function resetState() {
   nextButton.classList.add('hide')
-  checkGuessResponseText.classList.add('hide')
-  releaseDateText.classList.add('hide')
+  feedbackElement.classList.add('hide')
+  feedbackElement.className = 'feedback hide'
+  document.getElementById('user-answer').value = ''
 }
 
 function checkGuess() {
   userAnswer = document.getElementById('user-answer').value
-  console.log(userAnswer)
-  console.log(releaseDate)
-  if (userAnswer === releaseDate) {
-    checkGuessResponseText.textContent = 'Nice! You got it right!'
+  const correctYear = parseInt(releaseDate)
+  const guessedYear = parseInt(userAnswer)
+  
+  if (guessedYear === correctYear) {
+    currentScore += 2
+    showFeedback('Correct! You got 2 points!', 'correct')
+  } else if (Math.abs(guessedYear - correctYear) === 1) {
+    currentScore += 1
+    showFeedback(`Close! The correct year was ${releaseDate}. You got 1 point!`, 'partial')
   } else {
-    checkGuessResponseText.textContent = 'Sorry, that is incorrect. It was released in: '
-    releaseDateText.innerHTML = releaseDate
-    releaseDateText.classList.remove('hide')
+    showFeedback(`Incorrect. The movie was released in ${releaseDate}.`, 'incorrect')
   }
+  
+  updateScoreDisplay()
   document.getElementById('user-answer').value = ''
+  
   if (shuffledQuestions.length > currentQuestionIndex + 1) {
     nextButton.classList.remove('hide')
   } else {
-    startButton.innerText = 'Restart'
-    startButton.classList.remove('hide')
+    showFinalScore()
   }
-  checkGuessResponseText.classList.remove('hide')
+}
 
+function showFeedback(message, type) {
+  feedbackElement.textContent = message
+  feedbackElement.className = `feedback ${type}`
+  feedbackElement.classList.remove('hide')
+}
+
+function showFinalScore() {
+  startButton.innerText = 'Play Again'
+  startButton.classList.remove('hide')
+  showFeedback(`Game Over! Final Score: ${currentScore} out of ${shuffledQuestions.length * 2} possible points`, 'correct')
+}
+
+function updateScoreDisplay() {
+  scoreDisplay.textContent = currentScore
+  totalQuestionsDisplay.textContent = shuffledQuestions ? shuffledQuestions.length : 0
+  currentQuestionDisplay.textContent = questionsAnswered
 }
 
 const questions = [
